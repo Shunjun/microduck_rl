@@ -33,12 +33,12 @@ def test_cpu_bam_constants_mirror_training_cfg(ip):
     from bam.mjlab import BamActuator
     from mjlab_microduck.robot.microduck_constants import _BAM_ACTUATOR_KWARGS as k
 
-    assert ip.BAM_MOTOR_NAME == k["motor_name"]
-    assert ip.BAM_MODEL == k["model"]
+    assert ip.BAM_MOTOR_NAME == k.get("motor_name", ip.SERVO_DRIVER)
+    assert ip.BAM_MODEL == k.get("model", "m6")
     assert ip.BAM_KP_FW == k["kp_fw"]
-    assert ip.BAM_VIN_RANGE == k["vin_range"]
-    assert ip.BAM_VIN_DROP_GAIN_RANGE == k["vin_drop_gain_range"]
-    assert ip.BAM_VIN_MIN == k["vin_min"]
+    assert ip.BAM_VIN_RANGE == k.get("vin_range", (k.get("vin", 7.4),) * 2)
+    assert ip.BAM_VIN_DROP_GAIN_RANGE == k.get("vin_drop_gain_range", (0.0, 0.0))
+    assert ip.BAM_VIN_MIN == k.get("vin_min")
     assert ip.BAM_MAX_CURRENT == k.get("max_current")
     assert ip.BAM_STIFF_SOLREF_FRICTION == BamActuator._STIFF_SOLREF_FRICTION
     assert ip.BAM_STIFF_SOLIMP_FRICTION == BamActuator._STIFF_SOLIMP_FRICTION

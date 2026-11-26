@@ -1,0 +1,23 @@
+{
+  "repository": "https://github.com/ftservo/ftservo-bam",
+  "mirror": "https://gitee.com/ftservo/ftservo-bam",
+  "commit": "bab3967811f0bec8b79898cb03e7f5812fe581f9",
+  "retrieved": "2026-11-26",
+  "license": "Apache-2.0",
+  "reference_voltage_v": 7.4,
+  "reference_position_p": 32,
+  "files": {
+    "m6.json": {
+      "upstream_path": "bam/params/feetech_hd1910_7_4V/m6.json",
+      "sha256": "81a441fb921130bcc9bcfbd9ee0c77e3c38d9ab758bc7e0559fb029c436355ba"
+    },
+    "actuator.py": {
+      "upstream_path": "bam/feetech/actuator.py",
+      "sha256": "dffca90145054b12d61025529c02c2b01f7fe914953c9097e179abfa824dbddc"
+    },
+    "LICENSE": {
+      "upstream_path": "LICENSE",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd"
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "model": "HD-1910-C001",
+  "status": "manufacturer_reference_not_robot_identified",
+  "operating": {
+    "supply_voltage_v": 7.4,
+    "position_p": 180,
+    "delay_steps": [
+      3,
+      6
+    ],
+    "position_p_address": 21
+  },
+  "catalogue": {
+    "source": "https://www.feetechrc.com/510257",
+    "checked": "2026-11-26",
+    "voltage_range_v": [
+      4.0,
+      8.4
+    ],
+    "mass_g": 21,
+    "mass_tolerance_g": 2,
+    "dimensions_mm": [
+      34,
+      20,
+      23
+    ],
+    "gear_ratio": 320,
+    "backlash_max_deg": 0.5,
+    "encoder_counts_per_turn": 4096,
+    "performance_at_voltage": {
+      "voltage_v": 4.8,
+      "stall_torque_kgf_cm": 9,
+      "stall_torque_nm": 0.8825985000000001,
+      "rated_load_kgf_cm": 2.2,
+      "rated_load_nm": 0.21574630000000003,
+      "no_load_seconds_per_60deg": 0.137,
+      "stall_current_a": 1.2,
+      "rated_current_a": 0.5,
+      "no_load_current_max_a": 0.16,
+      "kt_kgf_cm_per_a": 7.5
+    }
+  },
+  "to_measure_or_confirm": {
+    "supply_voltage_under_load_range_v": null,
+    "total_command_to_response_delay_s": null,
+    "safe_joint_limits_rad": null,
+    "robot_mass_kg": null,
+    "link_com_and_inertias": null,
+    "encoder_zero_and_direction": null,
+    "imu_mount": null
+  },
+  "optional_refinement": [
+    "position step response at P=180",
+    "individual gear play and friction scatter",
+    "temperature and sustained load behaviour"
+  ],
+  "register_selection": {
+    "position_p_address_dec": 21,
+    "position_p_address_hex": "0x15",
+    "basis": "user-selected register; matches current microduck driver",
+    "manufacturer_recording_address_dec": 50,
+    "manufacturer_recording_address_applied": false
+  },
+  "delay_provenance": {
+    "units": "physics steps, not 50 Hz policy steps",
+    "basis": "user requested reuse of XL330 delay as an initial assumption",
+    "measured_on_this_robot": false
+  }
+}

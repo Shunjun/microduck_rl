@@ -90,8 +90,7 @@ uv run scripts/infer_policy.py --walking walk.onnx --standing stand.onnx \
 
 Keyboard-driven (velocity commands, `G` ground pick, `Y` sit/stand, `R` roulade,
 `K`/`L` kicks); `--debug`, `--save-csv`, `--record` support sim2real comparisons.
-The servos are simulated with the same BAM M6 XL330 model the policies are
-trained against (voltage control + load-dependent friction, via
+The servos use the same selected BAM M6 model as training (voltage control + load-dependent friction, via
 `bam.mujoco.MujocoController`); `--vin` / `--vin-drop-gain` / `--kp-fw` pin the
 training DR ranges to one value, `--no-bam` falls back to the XML PD actuators.
 
@@ -111,10 +110,16 @@ See `src/mjlab_microduck/tasks/backlash.py`.
 
 ## Actuator model
 
-All tasks use the [BAM](https://github.com/Rhoban/bam) M6 actuator model for
-the Dynamixel XL330 (voltage control law, back-EMF, Coulomb/Stribeck/load-dependent
-friction), with per-env domain randomization on battery voltage, voltage sag
-under load, command delay, and friction magnitude
+For the separate HD-1910-C001 / 7.4 V configuration, manufacturer BAM reference and
+measurement checklist, see [the Feetech configuration](src/mjlab_microduck/robot/feetech1910/README.md).
+Choose `SERVO_DRIVER` in `src/mjlab_microduck/robot/servo_config.py` for both training
+and CPU playback. The default is `feetech1910`; both drivers have separate profiles.
+
+Tasks use the selected [BAM](https://github.com/Rhoban/bam) M6 actuator model
+(voltage control law, back-EMF, Coulomb/Stribeck/load-dependent friction).
+The XL330 profile preserves its battery-voltage, voltage-sag and delay randomization;
+the HD1910 profile uses 7.4 V and P=180, with 3–6 physics steps of delay temporarily
+borrowed from XL330 at the operator’s request. Friction randomization remains in the task
 (`FrictionDRBamActuator` in `src/mjlab_microduck/actuator/`).
 
 At this scale — tiny servos driving a ~800 g biped — actuator fidelity is most

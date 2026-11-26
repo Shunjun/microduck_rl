@@ -1,0 +1,17 @@
+{
+  "model": "XL330",
+  "source": "Existing microduck_constants.py training defaults; not manufacturer ratings",
+  "bam": {
+    "motor_name": "xl330",
+    "model": "m6"
+  },
+  "operating": {
+    "supply_voltage_v": 7.4,
+    "position_p": 200.0,
+    "voltage_range_v": [6.5, 8.2],
+    "voltage_drop_gain_range": [0.0, 0.2],
+    "voltage_min_v": 6.0,
+    "delay_steps": [3, 6]
+  },
+  "delay_units": "physics steps, not 50 Hz policy steps"
+}

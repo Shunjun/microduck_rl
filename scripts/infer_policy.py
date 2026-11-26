@@ -26,18 +26,19 @@ MICRODUCK_XML = "src/mjlab_microduck/robot/microduck/scene.xml"
 MICRODUCK_ROLLERS_XML = "src/mjlab_microduck/robot/microduck/scene_rollers.xml"
 MICRODUCK_BALL_XML = "src/mjlab_microduck/robot/microduck/scene_ball.xml"
 
-# BAM M6 defaults — MUST mirror `_BAM_ACTUATOR_KWARGS` in
-# src/mjlab_microduck/robot/microduck_constants.py (the actuator every policy is
-# trained against in warp). Not imported from there: that module drags in
-# mjlab/torch/warp (~16 s import) for a CPU rehearsal script. Locked by
-# tests/test_infer_policy_bam.py.
-BAM_MOTOR_NAME = "xl330"
-BAM_MODEL = "m6"
-BAM_KP_FW = 200.0                 # microduck's preserved firmware stiffness
-BAM_VIN_RANGE = (6.5, 8.2)        # per-env battery voltage DR in training
-BAM_VIN_DROP_GAIN_RANGE = (0.0, 0.2)  # load-dependent sag V_drop = gain * sum|tau|
-BAM_VIN_MIN = 6.0                 # floor on effective voltage after sag
-BAM_MAX_CURRENT = None            # training runs WITHOUT the firmware current limiter
+# Shared with training without importing microduck_constants (torch/warp).
+from mjlab_microduck.robot.servo_config import (
+    SERVO_DRIVER, actuator_kwargs, load_bam_model as load_selected_bam_model,
+)
+
+_BAM_PROFILE = actuator_kwargs()
+BAM_MOTOR_NAME = _BAM_PROFILE.get("motor_name", SERVO_DRIVER)
+BAM_MODEL = _BAM_PROFILE.get("model", "m6")
+BAM_KP_FW = _BAM_PROFILE["kp_fw"]
+BAM_VIN_RANGE = _BAM_PROFILE.get("vin_range", (_BAM_PROFILE.get("vin", 7.4),) * 2)
+BAM_VIN_DROP_GAIN_RANGE = _BAM_PROFILE.get("vin_drop_gain_range", (0.0, 0.0))
+BAM_VIN_MIN = _BAM_PROFILE.get("vin_min")
+BAM_MAX_CURRENT = _BAM_PROFILE.get("max_current")
 # Stiff joint-friction constraint, copied from bam.mjlab.BamActuator
 # (stiff_frictionloss=True in training): warp has no noslip solver, so BAM
 # stiffens frictionloss so a statically-held joint does not creep. Mirrored
@@ -47,13 +48,8 @@ BAM_STIFF_SOLIMP_FRICTION = (0.99, 0.9999, 0.001, 0.5, 2.0)
 
 
 def load_bam_model(kp_fw: float, vin: float, max_current):
-    """Build the BAM M6 model + XL330 voltage-controlled actuator."""
-    from bam.model import load_model
-    bam_model = load_model(motor_name=BAM_MOTOR_NAME, model=BAM_MODEL)
-    bam_model.actuator.kp = kp_fw
-    bam_model.actuator.vin = vin
-    bam_model.actuator.max_current = max_current if (max_current and max_current > 0) else None
-    return bam_model
+    """Build the selected servo model/controller with explicit playback overrides."""
+    return load_selected_bam_model(kp_fw, vin, max_current)
 
 
 def load_mujoco_with_bam(xml_path: str, bam_model, timestep: float, vin_drop_gain, vin_min):
@@ -1200,10 +1196,10 @@ def main():
     parser.add_argument("--no-bam", action="store_true",
                         help="Use the XML MuJoCo position actuators instead of the BAM M6 "
                              "voltage/friction model the policies are trained against.")
-    parser.add_argument("--vin", type=float, default=7.4,
+    parser.add_argument("--vin", type=float, default=_BAM_PROFILE.get("vin", 7.4),
                         help="BAM battery voltage [V]. Training samples per-env in "
                              f"{BAM_VIN_RANGE}; 7.4 = nominal 2S LiPo.")
-    parser.add_argument("--vin-drop-gain", type=float, default=0.1,
+    parser.add_argument("--vin-drop-gain", type=float, default=sum(BAM_VIN_DROP_GAIN_RANGE) / 2,
                         help="BAM load-dependent voltage sag gain [V/Nm], V = vin - gain*sum|tau|. "
                              f"Training samples per-env in {BAM_VIN_DROP_GAIN_RANGE}. 0 disables.")
     parser.add_argument("--kp-fw", type=float, default=BAM_KP_FW,
@@ -1272,7 +1268,7 @@ def main():
     print(f"Loading MuJoCo model from: {xml_path}")
     bam_ctrl = None
     if not args.no_bam:
-        # Same actuator the policies are trained against in warp (BAM M6 XL330,
+        # Selected actuator used for training in warp (BAM M6,
         # voltage control + load-dependent friction budget), driven on CPU by
         # bam.mujoco.MujocoController. Voltage DR collapses to fixed --vin /
         # --vin-drop-gain (training samples them per env).
@@ -1291,8 +1287,7 @@ def main():
     # +/- kt * I_max. With BAM the limiter is modelled inside the voltage
     # controller instead (see load_bam_model). kt comes from the bam package.
     if args.no_bam and args.current_limit and args.current_limit > 0:
-        from bam.model import load_model
-        kt = load_model(motor_name="xl330", model="m6").kt.value
+        kt = load_bam_model(args.kp_fw, args.vin, None).kt.value
         torque_limit = kt * args.current_limit
         model.actuator_forcerange[:, 0] = -torque_limit
         model.actuator_forcerange[:, 1] = torque_limit

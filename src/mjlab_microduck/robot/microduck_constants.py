@@ -9,6 +9,7 @@ from mjlab_microduck.actuator import (
 )
 from mjlab.entity import EntityArticulationInfoCfg, EntityCfg
 from mjlab.utils.spec_config import CollisionCfg
+from mjlab_microduck.robot.servo_config import actuator_kwargs, prepare_bam_registry
 
 
 _ROBOT_DIR: Path = Path(os.path.dirname(__file__)) / "microduck"
@@ -153,26 +154,10 @@ FULL_COLLISION = CollisionCfg(
     # base_cfg=XmlPositionActuatorCfg(joint_names_expr=(r".*",)),
 # )
 
-# -- BAM M6 actuator (full voltage control + load-dependent friction) --
-# Exclude passive_* joints (jaw linkage in the new model has no XML actuator).
-# Voltage domain randomization (mirrors mjlab_microban):
-#   - vin_range: per-env battery voltage sampled at startup (replaces fixed vin)
-#   - vin_drop_gain_range: load-dependent voltage sag V_drop = gain * sum(|tau|)
-#   - vin_min: hard floor on the effective voltage after sag
-# kp_fw kept at 200 (microduck's preserved firmware stiffness; microban uses 125).
-_BAM_ACTUATOR_KWARGS = dict(
-    motor_name="xl330",
-    model="m6",
-    target_names_expr=(r"^(?!passive_).*",),
-    kp_fw=200.0,  # microduck's preserved firmware stiffness (microban uses 125)
-    # vin_range=(6.9, 7.9),
-    vin_range=(6.5, 8.2),
-    vin_drop_gain_range=(0.0, 0.2),
-    vin_min=6.0,
-    # max_current=1.75,
-    delay_min_lag=3,
-    delay_max_lag=6,
-)
+# Shared hardware selection and independent profiles live in robot/servo_config.py.
+# The same profile is used by the CPU rehearsal; neither joint order nor obs changes.
+_BAM_ACTUATOR_KWARGS = actuator_kwargs()
+prepare_bam_registry()
 actuators = FrictionDRBamActuatorCfg(**_BAM_ACTUATOR_KWARGS)
 
 # Same BAM actuator, but the firmware position loop reads the encoder THROUGH
