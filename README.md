@@ -21,6 +21,9 @@ reward-design lessons that made it work
 
 ## Quickstart
 
+HD1910 policy-free P-gain step-response bench (CPU, shared XL330 fixture CAD):
+[usage and plots](src/mjlab_microduck/robot/feetech1910_test_bench/README.md).
+
 Requires a CUDA GPU (training runs through MuJoCo Warp) and [uv](https://docs.astral.sh/uv/).
 
 > **On ARM boxes (DGX Spark / GB10, Jetson):** `uv sync` pulls ~2 GB of CUDA
@@ -44,6 +47,18 @@ uv run publish --onnx output.onnx --repo <user>/microduck-<name> --kind episodic
 # drive the exported policy in CPU MuJoCo with the keyboard
 uv run scripts/infer_policy.py --walking output.onnx
 ```
+
+All registered Microduck tasks default to local TensorBoard logging. The shared
+default is `DEFAULT_LOGGER` in `src/mjlab_microduck/training_config.py`; no
+per-task edits are needed. Override a run with `--agent.logger wandb` if desired.
+To view local curves from the repository directory:
+
+```bash
+uv run --with tensorboard tensorboard --logdir logs --port 6006
+```
+
+Open `http://localhost:6006` in your browser. This setting applies to newly
+started training processes.
 
 Resume from a checkpoint:
 

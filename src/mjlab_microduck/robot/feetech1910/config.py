@@ -31,7 +31,7 @@ def reference_parameters() -> dict:
 @dataclass(frozen=True, kw_only=True)
 class Feetech1910Config:
     supply_voltage_v: float = 7.4
-    position_p: int = 180
+    position_p: int = 6
     position_p_address: int = 21
     # User-selected initial assumption: reuse XL330 3..6 PHYSICS steps.
     # Not measured HD1910/Orange Pi latency; do not treat this as manufacturer data.

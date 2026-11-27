@@ -9,7 +9,8 @@ maybe_submit_to_hf_jobs()
 # (checkpoints.py, docs/training_checkpoints.md). A no-op without the flag.
 maybe_init_checkpoint()
 
-from mjlab.tasks.registry import register_mjlab_task
+# Apply shared project defaults at registration, including Backlash variants.
+from mjlab_microduck.training_config import register_microduck_task as register_mjlab_task
 from mjlab.tasks.velocity.rl import VelocityOnPolicyRunner
 
 
