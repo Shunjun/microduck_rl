@@ -18,7 +18,7 @@ class Feetech1910ConfigTests(unittest.TestCase):
     def test_operating_point_is_separate_from_manufacturer_reference(self):
         profile = config.load_config()
         self.assertEqual(profile.supply_voltage_v, 7.4)
-        self.assertEqual(profile.position_p, 180)
+        self.assertEqual(profile.position_p, 6)
         self.assertEqual(profile.delay_steps, (3, 6))
         self.assertEqual(profile.position_p_address, 21)
         reference = config.reference_parameters()
@@ -31,7 +31,7 @@ class Feetech1910ConfigTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "delay"):
             replace(profile, delay_steps=None).actuator_kwargs()
         kwargs = replace(profile, delay_steps=(1, 3)).actuator_kwargs()
-        self.assertEqual(kwargs["kp_fw"], 180)
+        self.assertEqual(kwargs["kp_fw"], 6)
         self.assertEqual(kwargs["vin"], 7.4)
         self.assertEqual((kwargs["delay_min_lag"], kwargs["delay_max_lag"]), (1, 3))
         self.assertNotIn("motor_name", kwargs)

@@ -3,7 +3,7 @@
   "status": "manufacturer_reference_not_robot_identified",
   "operating": {
     "supply_voltage_v": 7.4,
-    "position_p": 8,
+    "position_p": 6,
     "delay_steps": [
       3,
       6

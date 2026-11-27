@@ -11,7 +11,7 @@ from mjlab_microduck.robot import servo_config
 class ServoSelectionTests(unittest.TestCase):
     def test_default_is_feetech(self):
         self.assertEqual(servo_config.SERVO_DRIVER, "feetech1910")
-        self.assertEqual(servo_config.actuator_kwargs()["kp_fw"], 180)
+        self.assertEqual(servo_config.actuator_kwargs()["kp_fw"], 6)
 
     def test_xl330_defaults_are_preserved(self):
         data = servo_config.actuator_kwargs("xl330")
@@ -26,7 +26,7 @@ class ServoSelectionTests(unittest.TestCase):
     def test_feetech_does_not_borrow_xl330_physics(self):
         data = servo_config.actuator_kwargs("feetech1910")
         self.assertTrue(data["json_path"].endswith("feetech1910/reference/m6.json"))
-        self.assertEqual(data["kp_fw"], 180)
+        self.assertEqual(data["kp_fw"], 6)
         self.assertEqual(data["vin"], 7.4)
         self.assertNotIn("vin_drop_gain_range", data)
         self.assertEqual((data["delay_min_lag"], data["delay_max_lag"]), (3, 6))
@@ -39,7 +39,7 @@ class ServoSelectionTests(unittest.TestCase):
         ft = servo_config.load_bam_model(driver="feetech1910")
         xl = servo_config.load_bam_model(driver="xl330")
         self.assertEqual(type(ft.actuator).__name__, "HD1910Actuator")
-        self.assertEqual(ft.actuator.kp, 180)
+        self.assertEqual(ft.actuator.kp, 6)
         self.assertEqual(ft.actuator.vin, 7.4)
         self.assertEqual(xl.actuator.kp, 200)
         self.assertNotEqual(ft.kt.value, xl.kt.value)
