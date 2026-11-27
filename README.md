@@ -60,6 +60,32 @@ uv run --with tensorboard tensorboard --logdir logs --port 6006
 Open `http://localhost:6006` in your browser. This setting applies to newly
 started training processes.
 
+For a sequential Feetech P=6 batch on a single Linux/WSL GPU:
+
+```bash
+uv run python scripts/train_remaining.py \
+  --walk-checkpoint logs/rsl_rl/velocity/<p6-run>/model_1999.pt \
+  --target 4000 --num-envs 2048
+```
+
+Add `--plan` to list the queue without training. Velocity resumes its full training
+state and saved twist command ranges to checkpoint `model_3999.pt`; the other
+tasks each train for 4000 iterations. The queue then trains SitStand, StandUp,
+GroundPick, right/left BallKick, Roulade, and finally VelStand. Each stage gets a
+separate 64-env, 5-iteration smoke check before the formal run; any failure stops
+the queue. Completed checkpoint paths are recorded under `logs/batches/`.
+Re-running this command starts a new batch; it does not resume interrupted stages.
+
+This batch's VelStand is an experimental local-teacher recipe: it initializes
+only the actor from the P6 walk (fresh critic/optimizer/counters), uses the new
+P6 StandUp as the recovery teacher and the walk as its anchor, and disables the
+upstream policy's calibrated yaw lookup. It does not download the upstream
+XL330 teachers. Inspect both teachers before trusting the combined policy;
+4000 iterations is a budget, not a guarantee of learned actions. Logs live in
+`logs/rsl_rl/batch_p6_*`. Preview the left/right kicks with the persistent task
+IDs `Mjlab-BallKick-Left-Flat-MicroDuck` / `Mjlab-BallKick-Right-Flat-MicroDuck`,
+and the combined policy with `Mjlab-VelStand-Flat-MicroDuck`.
+
 Resume from a checkpoint:
 
 ```bash

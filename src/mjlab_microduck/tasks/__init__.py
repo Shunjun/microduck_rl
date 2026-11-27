@@ -1,4 +1,5 @@
 from mjlab_microduck.train_hook import maybe_init_checkpoint, maybe_submit_to_hf_jobs
+from dataclasses import replace
 
 # `train <task> ... --hf-jobs` submits to HF Jobs and exits here, before any
 # of the cfg imports below: this module is what mjlab's plugin loader pulls
@@ -167,6 +168,16 @@ register_mjlab_task(
     rl_cfg=MicroduckBallKickRlCfg,
     runner_cls=MicroduckOnPolicyRunner,
 )
+
+# Explicit feet allow sequential training without editing KICK_FOOT between runs.
+for _foot in ("left", "right"):
+    register_mjlab_task(
+        task_id=f"Mjlab-BallKick-{_foot.title()}-Flat-MicroDuck",
+        env_cfg=make_microduck_ball_kick_env_cfg(kick_foot=_foot),
+        play_env_cfg=make_microduck_ball_kick_env_cfg(play=True, kick_foot=_foot),
+        rl_cfg=replace(MicroduckBallKickRlCfg, experiment_name=f"ball_kick_{_foot}", run_name=f"ball_kick_{_foot}"),
+        runner_cls=MicroduckOnPolicyRunner,
+    )
 
 register_mjlab_task(
     task_id="Mjlab-GroundPick-Rough-MicroDuck",
